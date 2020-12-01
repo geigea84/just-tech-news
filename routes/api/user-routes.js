@@ -17,7 +17,10 @@ equivalent of the following SQL query: SELECT * FROM users; */
 //Get /api/users
 router.get("/", (req, res) => {
     //access our User model and run .findAll() method
-    User.findAll()
+    //1.6 edit attributes to exclude password
+    User.findAll({
+        attributes: {exclude: ["password"]}
+    })
         .then(dbUserData => res.json(dbUserData))
         .catch(err => {
             console.log(err);
@@ -96,6 +99,7 @@ router.put("/:id", (req, res) => {
     //expects {username: "string", email: "string", password: "string"}
     //if req.body has exact key/value pairs to match the model, you can just use `req.body` instead
     User.update(req.body, {
+        individualHooks: true,
         where: {
             id: req.params.id
         }

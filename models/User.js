@@ -1,6 +1,11 @@
 //1.5 create the user model
 const {Model, DataTypes} = require("sequelize");
 const sequelize = require("../config/connection");
+//2.4
+const bcrypt = require("bcrypt");
+
+/* 2.5 Also known as lifecycle events, hooks are functions 
+that are called before or after calls in Sequelize. */
 
 //create our User model
 class User extends Model {}
@@ -46,6 +51,40 @@ User.init(
         }
     },
     {
+        /* 2.5 Let's break down this code to see what is happening. 
+        We use the beforeCreate() hook to execute the bcrypt hash 
+        function on the plaintext password. In the bcrypt hash function, 
+        we pass in the userData object that contains the plaintext password 
+        in the password property. We also pass in a saltRound value of 10.
+
+        The resulting hashed password is then passed to the Promise object 
+        as a newUserData object with a hashed password property. The return 
+        statement then exits out of the function, returning the hashed 
+        password in the newUserData function.
+        hooks: {
+            //set up beforeCreate lifecycle "hook" functionality
+            beforeCreate(userData) {
+                return bcrypt.hash(userData.password, 10).then(newUserData => {
+                    return newUserData;
+                });
+            }
+        },
+        */
+
+        //2.5 actual hooks we'll use because their teaching methods are bat-shit insane
+        hooks: {
+            //set up beforeCreate lifecycle "hook" functionality
+            async beforeCreate(newUserData) {
+                newUserData.password = await bcrypt.hash(newUserData.password, 10);
+                return newUserData;
+            },
+            //set up beforeUpdate lifecycle "hook" functionality
+            //we will need to add the option { individualHooks: true } in User.update in user-routes.js
+            async beforeUpdate(updatedUserData) {
+                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+            }
+        },
+
         //TABLE CONFIGURATION OPTIONS GO HERE (https://sequelize.org/v5/manual/models-definition.html#configuration)
 
         //pass in our imported sequelize connection (the direct connection to our database)
