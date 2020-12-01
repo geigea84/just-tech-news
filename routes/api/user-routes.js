@@ -7,6 +7,7 @@ const {User} = require("../../models");
 //.create()
 //.update()
 //.destroy()
+//.findOne()
 
 /* 1.6 As mentioned before, the User model inherits functionality 
 from the Sequelize Model class. .findAll() is one of the Model 
@@ -80,6 +81,43 @@ router.post("/", (req, res) => {
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
+        });
+});
+
+//2.6 create the login route that will verify the user's identity
+/* The .findOne() Sequelize method looks for a user with the 
+specified email. The result of the query is passed as dbUserData 
+to the .then() part of the .findOne() method. If the query result 
+is successful (i.e., not empty), we can call .checkPassword(), 
+which will be on the dbUserData object. We'll need to pass the 
+plaintext password, which is stored in req.body.password, into 
+.checkPassword() as the argument.
+
+The .compareSync() method, which is inside the .checkPassword() 
+method, can then confirm or deny that the supplied password matches 
+the hashed password stored on the object. .checkPassword() will then 
+return true on success or false on failure. We'll store that boolean 
+value to the variable validPassword. */
+router.post("/login", (req, res) => {
+    //expects {email: "string", password: "string"}
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    })
+        .then(dbUserData => {
+            if (!dbUserData) {
+                res.status(400).json({message: "No user with that email address!"});
+                return;
+            }
+
+            //verify user
+            const validPassword = dbUserData.checkPassword(req.body.password);
+            if (!validPassword) {
+                res.status(400).json({message: "Incorrect password!"});
+                return;
+            }
+            res.json({usesr: dbUserData, message: "You are now logged in!"});
         });
 });
 
