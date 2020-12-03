@@ -24,7 +24,7 @@ which was used previously. This allows the table to be overwritten and re-create
 Dropping all the tables every time the application restarts is no longer necessary 
 and in fact will constantly drop all the entries and seed data we enter, which can 
 get very annoying. Think of this true/false force relationship as a reset button:
-Do we need to update/sync the connections? Force true to reset, otherwise false. */
+Do we need to update/sync the relationships? Force true to reset, otherwise false. */
 sequelize.sync({force: false}).then(() => {
         app.listen(PORT, () => console.log("Now listening"));
 });
