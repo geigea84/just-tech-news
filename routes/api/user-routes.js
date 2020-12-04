@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const {User, Post, Vote} = require("../../models");
+const {User, Post, Vote, Comment} = require("../../models");
 
 //Sequelize methods used
 //.findAll()
@@ -22,11 +22,11 @@ router.get("/", (req, res) => {
     User.findAll({
         attributes: {exclude: ["password"]}
     })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbUserData => res.json(dbUserData))
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 });
 
 /* 1.6 This one is a little different from the .findAll() method 
@@ -42,6 +42,7 @@ much like the following SQL query: SELECT * FROM users WHERE id = 1 */
 //GET /api/users/1
 router.get("/:id", (req, res) => {
     User.findOne({
+        attributes: {exclude: ["password"]},
         where: {
             id: req.params.id
         },
@@ -49,6 +50,19 @@ router.get("/:id", (req, res) => {
             {
                 model: Post,
                 attributes: ["id", "title", "post_url", "created_at"]
+            },
+            //5.5 added Comment model
+            {
+                model: Comment,
+                attributes: [
+                    "id",
+                    "comment_text",
+                    "created_at"
+                ],
+                include: {
+                    model: Post,
+                    attributes: ["title"]
+                }
             },
             {
                 model: Post,
@@ -58,17 +72,17 @@ router.get("/:id", (req, res) => {
             }
         ]
     })
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(404).json({message: "No user found with this id"});
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbUserData => {
+        if (!dbUserData) {
+            res.status(404).json({message: "No user found with this id"});
+            return;
+        }
+        res.json(dbUserData);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 });
 
 /* 1.6 To insert data, we can use Sequelize's .create() method. 
@@ -89,11 +103,11 @@ router.post("/", (req, res) => {
         email: req.body.email,
         password: req.body.password
     })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbUserData => res.json(dbUserData))
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 });
 
 //2.6 create the login route that will verify the user's identity
@@ -117,20 +131,20 @@ router.post("/login", (req, res) => {
             email: req.body.email
         }
     })
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(400).json({message: "No user with that email address!"});
-                return;
-            }
+    .then(dbUserData => {
+        if (!dbUserData) {
+            res.status(400).json({message: "No user with that email address!"});
+            return;
+        }
 
-            //verify user
-            const validPassword = dbUserData.checkPassword(req.body.password);
-            if (!validPassword) {
-                res.status(400).json({message: "Incorrect password!"});
-                return;
-            }
-            res.json({usesr: dbUserData, message: "You are now logged in!"});
-        });
+        //verify user
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        if (!validPassword) {
+            res.status(400).json({message: "Incorrect password!"});
+            return;
+        }
+        res.json({usesr: dbUserData, message: "You are now logged in!"});
+    });
 });
 
 /* 1.6 This .update() method combines the parameters for creating 
@@ -154,17 +168,17 @@ router.put("/:id", (req, res) => {
             id: req.params.id
         }
     })
-        .then(dbUserData => {
-            if (!dbUserData[0]) {
-                res.status(404).json({message: "No user found with this id"});
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbUserData => {
+        if (!dbUserData[0]) {
+            res.status(404).json({message: "No user found with this id"});
+            return;
+        }
+        res.json(dbUserData);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 });
 
 /* 1.6 To delete data, use the .destroy() method and provide 
@@ -178,17 +192,17 @@ router.delete("/:id", (req, res) => {
             id: req.params.id
         }
     })
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(404).json({message: "No user found with this id"});
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+    .then(dbUserData => {
+        if (!dbUserData) {
+            res.status(404).json({message: "No user found with this id"});
+            return;
+        }
+        res.json(dbUserData);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
 });
 
 module.exports = router;

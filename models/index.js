@@ -3,10 +3,12 @@ It seems unnecessary at the moment, but doing this now will set us up for future
 
 //3.4 added Post const and export
 //4.3 added Vote const and export
+//5.3 added Comment const and export
 
-const User = require("./User");
-const Post = require("./Post");
-const Vote = require("./Vote")
+const User    = require("./User");
+const Post    = require("./Post");
+const Vote    = require("./Vote");
+const Comment = require("./Comment");
 
 //3.5 create association
 User.hasMany(Post, {
@@ -54,6 +56,7 @@ queried on. So because the user_id and post_id pairings must
 be unique, we're protected from the possibility of a single 
 user voting on one post multiple times.*/
 
+//4.3
 Vote.belongsTo(User, {
     foreignKey: "user_id"
 });
@@ -70,4 +73,25 @@ Post.hasMany(Vote, {
     foreignKey: "post_id"
 });
 
-module.exports = {User, Post, Vote};
+//5.3
+Comment.belongsTo(User, {
+    foreignKey: "user_id"
+});
+
+Comment.belongsTo(Post, {
+    foreignKey: "post_id"
+});
+
+User.hasMany(Comment, {
+    foreignKey: "user_id"
+});
+
+Post.hasMany(Comment, {
+    foreignKey: "post_id"
+});
+/* Note that we don't have to specify Comment as a through 
+table like we did for Vote (ln 28, 34). This is because we 
+don't need to access Post through Comment; we just want to 
+see the user's comment and which post it was for. */
+
+module.exports = {User, Post, Vote, Comment};
