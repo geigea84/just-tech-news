@@ -1,14 +1,24 @@
 //1.6
-
-const express = require("express");
-const routes = require("./routes");
+const express   = require("express");
+const routes    = require("./controllers");
 const sequelize = require("./config/connection");
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+//14.1.3
+const path      = require("path");
+//14.1.4
+const exphbs    = require("express-handlebars");
+const hbs       = exphbs.create({});
+
+const app       = express();
+const PORT      = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+//14.1.3
+app.use(express.static(path.join(__dirname, "public")));
+//14.1.4
+app.engine("handlebars", hbs.engine);
+app.set("view engine", "handlebars");
 
 //turn on routes (connects to const defined on line 4)
 app.use(routes);

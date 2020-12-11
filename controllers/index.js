@@ -12,8 +12,13 @@ incorrect resource, another RESTful API practice.
 Now when we import the routes to server.js, they'll 
 already be packaged and ready to go with this one file. */
 
-const router = require("express").Router();
-const apiRoutes = require("./api");
+const router     = require("express").Router();
+const apiRoutes  = require("./api");
+
+//14.1.4
+const homeRoutes = require("./home-routes.js");
+router.use("/", homeRoutes);
+
 router.use("/api", apiRoutes);
 router.use((req, res) => {
     res.status(404).end();
