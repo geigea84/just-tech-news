@@ -9,6 +9,8 @@ const {Post, User, Comment} = require("../models");
 //14.1.5 added 2nd argument (object) to res.render
 //14.1.6 removed hard coded object and inserted Post model
 router.get("/", (req, res) => {
+    console.log(req.session);
+
     Post.findAll({
         attributes: [
             "id",
@@ -64,6 +66,16 @@ router.get("/", (req, res) => {
         console.log(err);
         res.status(500).json(err);
     });
+});
+
+//14.2.3
+router.get("/login", (req, res) => {
+    if (req.session.loggedIn) {
+        res.redirect("/");
+        return;
+    }
+
+    res.render("login");
 });
 
 /* Previously, we used res.send() or res.sendFile() 
