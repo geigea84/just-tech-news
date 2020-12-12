@@ -111,16 +111,19 @@ router.post("/", (req, res) => {
 });
 
 //4.4 PUT /api/posts/upvote
+//4.6 update
+//14.3.4 update
 router.put("/upvote", (req, res) => {
-    //4.6 update
-    //custom static method created in models/Post.js
-    Post.upvote(req.body, {Vote})
-    .then(dbPostData => res.json(dbPostData))
-    .catch(err => {
-        console.log(err);
-        res.status(400).json(err);
-    });
-    
+    //make sure the session exists first
+    if (req.session) {
+        //passs session id along with all destructured properties on req.body
+        Post.upvote({...req.body, user_id: req.session.user_id}, {Vote, Comment, User})
+        .then(updatedVoteData => res.json(updatedVoteData))
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+    }
 });
 /* Instead of trying to predict and build a method for 
 every possible use developers have for SQL databases, 
